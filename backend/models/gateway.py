@@ -1,11 +1,22 @@
 from typing import AsyncIterator
 from .providers.base import BaseProvider, ModelConfig
 from .providers.openai import OpenAIProvider
+from .providers.anthropic import AnthropicProvider
+from .providers.gemini import GeminiProvider
+from .providers.moonshot import MoonshotProvider
+from .providers.openrouter import OpenRouterProvider
+from .providers.ollama import OllamaProvider
 
 _PROVIDERS: dict[str, type[BaseProvider]] = {
     "openai": OpenAIProvider,
+    "anthropic": AnthropicProvider,
+    "gemini": GeminiProvider,
+    "moonshot": MoonshotProvider,
+    "openrouter": OpenRouterProvider,
+    "ollama": OllamaProvider,
 }
 
+_NO_TOOL_CALLING = {"huggingface"}
 
 def _get_provider(config: ModelConfig) -> BaseProvider:
     provider_class = _PROVIDERS.get(config.provider)
@@ -25,9 +36,7 @@ class ModelGateway:
             yield chunk
 
     def supports_tool_calling(self, config: ModelConfig) -> bool:
-        if config.provider == "huggingface":
-            return False
-        return True
+        return config.provider not in _NO_TOOL_CALLING
 
     def get_context_window(self, config: ModelConfig) -> int:
         try:
