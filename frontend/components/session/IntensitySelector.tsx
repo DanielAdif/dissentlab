@@ -17,22 +17,29 @@ export function IntensitySelector({
   onChange: (v: Intensity) => void;
 }) {
   return (
-    <div className="flex gap-2">
-      {OPTIONS.map((opt) => (
-        <button
-          key={opt.value}
-          onClick={() => onChange(opt.value)}
-          className={cn(
-            "flex-1 py-2 px-3 rounded-md border text-sm transition-colors",
-            value === opt.value
-              ? "border-accent bg-accent/10 text-accent"
-              : "border-border text-muted hover:border-foreground/30 hover:text-foreground"
-          )}
-        >
-          <div className="font-medium">{opt.label}</div>
-          <div className="text-xs opacity-70">{opt.description}</div>
-        </button>
-      ))}
+    <div className="space-y-3">
+      <div className="flex gap-2">
+        {OPTIONS.map((opt) => (
+          <button
+            key={opt.value}
+            onClick={() => onChange(opt.value)}
+            className={cn(
+              "flex-1 py-2 px-3 rounded-md border text-sm transition-colors",
+              value === opt.value
+                ? "border-accent bg-accent/10 text-accent"
+                : "border-border text-muted hover:border-foreground/30 hover:text-foreground"
+            )}
+          >
+            <div className="font-medium">{opt.label}</div>
+            <div className="text-xs opacity-70">{opt.description}</div>
+          </button>
+        ))}
+      </div>
+      {value === "deep_dive" && (
+        <p className="text-xs text-contrarian mt-2">
+          Deep Dive runs up to 15 rounds and may use significantly more API tokens.
+        </p>
+      )}
     </div>
   );
 }
