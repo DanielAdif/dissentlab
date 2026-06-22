@@ -370,9 +370,6 @@ async def node_persona_research(state: CouncilState) -> CouncilState:
                     },
                 )
 
-            # Only one search per persona per loop iteration (angle is fixed).
-            break
-
     return {**state, "_raw_sources": all_raw_sources}
 
 
