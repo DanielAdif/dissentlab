@@ -70,3 +70,7 @@ class CouncilState(TypedDict):
     user_stop_requested: bool
     model_config: dict
     error: Optional[str]
+    # Internal field used to pass raw search results between research nodes.
+    # Not part of the public debate state; populated by node_persona_research,
+    # consumed and cleared by node_evidence_merger.
+    _raw_sources: list[dict]

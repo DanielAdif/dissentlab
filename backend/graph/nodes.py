@@ -1,4 +1,5 @@
 import json
+import uuid
 import asyncio
 from datetime import datetime, timezone
 from models.gateway import ModelGateway, ModelConfig
@@ -8,6 +9,13 @@ from agents.base import (
     build_final_report_prompt,
 )
 from graph.state import CouncilState
+from storage.db import get_db
+from storage.repositories.settings import SettingsRepository
+from storage.chroma_client import ChromaClient
+from security.encryption import decrypt
+from tools.search import tavily_search
+from tools.reader import read_url
+from tools.summarizer import summarize_for_claim
 
 _MAX_ROUNDS = {"quick": 1, "standard": 5, "deep_dive": 15}
 _CONSENSUS_THRESHOLD = 0.75
@@ -241,6 +249,167 @@ def should_continue(state: CouncilState) -> str:
     if not latest["should_continue"]:
         return "final_report"
     return "debate_round"
+
+
+async def node_persona_research(state: CouncilState) -> CouncilState:
+    """Conduct per-persona web research using Tavily and URL reader.
+
+    Retrieves the Tavily API key from settings (encrypted), builds
+    persona-specific search angles, and populates ``_raw_sources`` with
+    summarised sources for each active (non-observer) persona.
+
+    Skips silently when no Tavily key is configured.
+    """
+    gateway = ModelGateway()
+    config = _get_model_config(state)
+
+    intensity_limits = {
+        "quick": (2, 3),
+        "standard": (4, 6),
+        "deep_dive": (8, 12),
+    }
+    max_searches, max_urls = intensity_limits.get(state["debate_intensity"], (4, 6))
+
+    # Retrieve and decrypt the Tavily key stored in settings.
+    tavily_key: str | None = None
+    async with get_db() as db:
+        repo = SettingsRepository(db)
+        enc_key = await repo.get("tavily_api_key")
+        if enc_key:
+            try:
+                tavily_key = decrypt(enc_key)
+            except ValueError:
+                tavily_key = None
+
+    if not tavily_key:
+        _emit(
+            state,
+            "status.update",
+            {"message": "No Tavily key configured — skipping web research."},
+        )
+        return {**state, "_raw_sources": []}
+
+    active_personas = [
+        p for p in state["personas"] if p["enabled"] and p["id"] != "observer"
+    ]
+    persona_search_angles: dict[str, str] = {
+        "optimist": f"opportunities advantages success {state['user_question']}",
+        "pessimist": f"risks failures problems costs {state['user_question']}",
+        "contrarian": (
+            f"counterarguments assumptions alternative perspectives {state['user_question']}"
+        ),
+    }
+
+    all_raw_sources: list[dict] = []
+    total_searches = 0
+    total_urls = 0
+
+    for persona in active_personas:
+        if total_searches >= 30:
+            break
+        angle = persona_search_angles.get(persona["id"], state["user_question"])
+        _emit(
+            state,
+            "research.begun",
+            {"persona_id": persona["id"], "persona_name": persona["name"]},
+        )
+
+        persona_searches = 0
+        persona_urls = 0
+
+        while persona_searches < max_searches and total_searches < 30:
+            try:
+                results = await tavily_search(angle, tavily_key, max_results=5)
+            except Exception:
+                break
+
+            persona_searches += 1
+            total_searches += 1
+
+            for r in results:
+                if total_urls >= 50 or persona_urls >= max_urls:
+                    break
+                url = r.get("url", "")
+                if not url:
+                    continue
+                try:
+                    text = await read_url(url)
+                except Exception:
+                    continue
+                persona_urls += 1
+                total_urls += 1
+
+                try:
+                    summary = await summarize_for_claim(
+                        text, state["user_question"], gateway, config
+                    )
+                except Exception:
+                    summary = ""
+
+                if "[Not relevant]" in summary or not summary:
+                    continue
+
+                parsed = url.split("/")
+                domain = parsed[2] if len(parsed) > 2 else url
+                raw_src = {
+                    "url": url,
+                    "title": r.get("title", url),
+                    "domain": domain,
+                    "summary": summary,
+                    "discovered_by": persona["id"],
+                    "claims": [],
+                }
+                all_raw_sources.append(raw_src)
+                _emit(
+                    state,
+                    "source.found",
+                    {
+                        "title": raw_src["title"],
+                        "url": url,
+                        "persona_id": persona["id"],
+                    },
+                )
+
+            # Only one search per persona per loop iteration (angle is fixed).
+            break
+
+    return {**state, "_raw_sources": all_raw_sources}
+
+
+async def node_evidence_merger(state: CouncilState) -> CouncilState:
+    """Deduplicate and score raw sources, then store them in state.
+
+    Reads ``_raw_sources`` populated by ``node_persona_research``, deduplicates
+    by URL with relevance scoring via ``ChromaClient``, and stores the final
+    list in ``state["sources"]`` (max 50 entries).
+    """
+    raw_sources: list[dict] = state.get("_raw_sources", [])  # type: ignore[assignment]
+    if not raw_sources:
+        return state
+
+    chroma = ChromaClient()
+    deduped = chroma.deduplicate(raw_sources, state["user_question"])
+
+    sources: list[dict] = []
+    for s in deduped[:50]:
+        sources.append({
+            "id": str(uuid.uuid4())[:8],
+            "title": s["title"],
+            "url": s["url"],
+            "domain": s["domain"],
+            "retrieved_at": datetime.now(timezone.utc).isoformat(),
+            "summary": s["summary"],
+            "discovered_by": s["discovered_by"],
+            "relevance_score": s.get("relevance_score", 0.5),
+            "claims": s.get("claims", []),
+        })
+
+    _emit(
+        state,
+        "status.update",
+        {"message": f"Evidence pool ready: {len(sources)} sources"},
+    )
+    return {**state, "sources": sources}
 
 
 async def node_final_report(state: CouncilState) -> CouncilState:
