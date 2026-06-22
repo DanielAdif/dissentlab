@@ -14,7 +14,7 @@ _CONSENSUS_THRESHOLD = 0.75
 _REPETITION_THRESHOLD = 0.85
 
 
-def _get_model_config(state: CouncilState, persona_id: str | None = None) -> ModelConfig:
+def _get_model_config(state: CouncilState) -> ModelConfig:
     mc = state["model_config"]
     return ModelConfig(
         provider=mc["provider"],
@@ -185,14 +185,14 @@ async def node_observer_checkpoint(state: CouncilState) -> CouncilState:
         repetition_score = float(parsed.get("repetition_score", 0.0))
         agreements = parsed.get("agreements", [])
         disagreements = parsed.get("disagreements", [])
-        should_continue = bool(parsed.get("should_continue", True))
+        observer_should_continue = bool(parsed.get("should_continue", True))
         reason = parsed.get("reason", "")
     except Exception:
         consensus_score = 0.5
         repetition_score = 0.0
         agreements = []
         disagreements = []
-        should_continue = True
+        observer_should_continue = True
         reason = "Observer could not evaluate — continuing."
 
     checkpoint = {
@@ -201,7 +201,7 @@ async def node_observer_checkpoint(state: CouncilState) -> CouncilState:
         "repetition_score": repetition_score,
         "agreements": agreements,
         "disagreements": disagreements,
-        "should_continue": should_continue,
+        "should_continue": observer_should_continue,
         "reason": reason,
     }
     new_checkpoints = list(state["observer_checkpoints"]) + [checkpoint]
@@ -211,7 +211,7 @@ async def node_observer_checkpoint(state: CouncilState) -> CouncilState:
         "consensus_score": consensus_score,
         "agreements": agreements,
         "disagreements": disagreements,
-        "should_continue": should_continue,
+        "should_continue": observer_should_continue,
         "reason": reason,
     })
 
