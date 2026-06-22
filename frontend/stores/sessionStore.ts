@@ -59,7 +59,7 @@ export const useSessionStore = create<SessionState>((set) => ({
   addSource: (src) => set((s) => ({ sources: [...s.sources, src] })),
   setFinalReport: (report) => set({ finalReport: report, phase: "completed" }),
   setStatusMessage: (statusMessage) => set({ statusMessage }),
-  setError: (error) => set({ error, phase: "error" }),
+  setError: (error) => set({ error: error || null, phase: error ? "error" : "idle" }),
   setAutoScroll: (autoScroll) => set({ autoScroll }),
   reset: () => set(initialState),
 }));

@@ -8,6 +8,7 @@ import { PhaseIndicator } from "@/components/debate/PhaseIndicator";
 import { MessageCard } from "@/components/debate/MessageCard";
 import { ObserverCheckpointCard } from "@/components/debate/ObserverCheckpoint";
 import { SourcePanel } from "@/components/debate/SourcePanel";
+import { ErrorBanner } from "@/components/ui/ErrorBanner";
 
 export default function SessionPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -80,6 +81,18 @@ export default function SessionPage({ params }: { params: Promise<{ id: string }
       )}
 
       <div className="space-y-4">
+        {!connected && (
+          <ErrorBanner
+            message="Connection lost. Attempting to reconnect..."
+            onDismiss={() => store.setError("")}
+          />
+        )}
+        {store.error && (
+          <ErrorBanner
+            message={store.error}
+            onDismiss={() => store.setError("")}
+          />
+        )}
         {allRounds.map((round) => {
           const roundMessages = store.messages.filter((m) => m.round_number === round);
           const checkpoint = store.checkpoints.find((c) => c.round_number === round);
@@ -100,12 +113,6 @@ export default function SessionPage({ params }: { params: Promise<{ id: string }
             </div>
           );
         })}
-
-        {store.phase === "error" && store.error && (
-          <div className="border border-pessimist/40 rounded-md p-4 text-pessimist text-sm">
-            {store.error}
-          </div>
-        )}
 
         <SourcePanel />
 
