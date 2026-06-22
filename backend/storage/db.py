@@ -6,7 +6,9 @@ DB_PATH = os.environ.get("DB_PATH", "/data/db/dissentlab.db")
 
 @asynccontextmanager
 async def get_db():
-    os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
+    db_dir = os.path.dirname(DB_PATH)
+    if db_dir:
+        os.makedirs(db_dir, exist_ok=True)
     async with aiosqlite.connect(DB_PATH) as db:
         db.row_factory = aiosqlite.Row
         await run_migrations(db)
