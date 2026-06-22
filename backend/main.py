@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from api.sessions import router as sessions_router
 from api.models import router as models_router
+from api.personas import router as personas_router
 from api.settings import router as settings_router
 from api.ws import router as ws_router
 
@@ -17,6 +18,7 @@ app.add_middleware(
 
 app.include_router(sessions_router)
 app.include_router(models_router)
+app.include_router(personas_router)
 app.include_router(settings_router)
 app.include_router(ws_router)
 

@@ -35,6 +35,19 @@ export type Provider = {
   configured: boolean;
 };
 
+export type Persona = {
+  id: string;
+  name: string;
+  role: string;
+  system_prompt: string;
+  enabled: number;
+  is_default: number;
+  model_provider: string;
+  model_name: string;
+  created_at: string;
+  updated_at: string;
+};
+
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
   const res = await fetch(`${BASE}${path}`, {
     headers: { "Content-Type": "application/json" },
@@ -74,4 +87,17 @@ export const api = {
 
   patchSettings: (patch: { ollama_url?: string; default_intensity?: string }) =>
     request<{ ollama_url: string; default_intensity: string }>("/api/settings", { method: "PATCH", body: JSON.stringify(patch) }),
+
+  listPersonas: () => request<Persona[]>("/api/personas"),
+
+  createPersona: (body: { name: string; role: string; system_prompt: string }) =>
+    request<Persona>("/api/personas", { method: "POST", body: JSON.stringify(body) }),
+
+  updatePersona: (id: string, patch: { name?: string; role?: string; system_prompt?: string; enabled?: number }) =>
+    request<Persona>(`/api/personas/${id}`, { method: "PATCH", body: JSON.stringify(patch) }),
+
+  deletePersona: (id: string) => request<void>(`/api/personas/${id}`, { method: "DELETE" }),
+
+  restoreDefaultPersonas: () =>
+    request<{ ok: boolean }>("/api/personas/restore-defaults", { method: "POST" }),
 };
