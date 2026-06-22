@@ -1,0 +1,42 @@
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+    volumes:
+      - ./backend:/app
+      - dissentlab_db:/data/db
+      - dissentlab_chroma:/data/chroma
+      - dissentlab_models:/data/models
+      - dissentlab_cache:/data/cache
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - dissentlab
+
+  frontend:
+    image: node:22-alpine
+    working_dir: /app
+    command: npm run dev
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      - BACKEND_URL=http://backend:8000
+    depends_on:
+      - backend
+    networks:
+      - dissentlab
+
+volumes:
+  dissentlab_db:
+  dissentlab_chroma:
+  dissentlab_models:
+  dissentlab_cache:
+
+networks:
+  dissentlab:
+    driver: bridge
