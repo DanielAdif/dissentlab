@@ -7,6 +7,7 @@ import { useSession } from "@/hooks/useSession";
 import { PhaseIndicator } from "@/components/debate/PhaseIndicator";
 import { MessageCard } from "@/components/debate/MessageCard";
 import { ObserverCheckpointCard } from "@/components/debate/ObserverCheckpoint";
+import { SourcePanel } from "@/components/debate/SourcePanel";
 
 export default function SessionPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -105,6 +106,8 @@ export default function SessionPage({ params }: { params: Promise<{ id: string }
             {store.error}
           </div>
         )}
+
+        <SourcePanel />
 
         <div ref={bottomRef} />
       </div>

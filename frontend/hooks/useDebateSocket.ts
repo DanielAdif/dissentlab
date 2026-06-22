@@ -53,6 +53,15 @@ export function useDebateSocket(sessionId: string | null) {
           reason: event.payload.reason as string,
         });
         break;
+      case "source.found":
+        store.addSource({
+          title: event.payload.title as string,
+          url: (event.payload.url as string) ?? "",
+          domain: (event.payload.url as string)?.split("/")[2] ?? "",
+          summary: "",
+          persona_id: event.payload.persona_id as string,
+        });
+        break;
       case "final_report.done":
         store.setFinalReport(event.payload.content as string);
         break;

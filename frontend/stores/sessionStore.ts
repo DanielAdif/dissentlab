@@ -3,13 +3,22 @@ import type { DebateMessage, ObserverCheckpoint } from "@/lib/api";
 
 type Phase = "idle" | "researching" | "positions" | "debating" | "final" | "completed" | "error";
 
+export type Source = {
+  id?: string;
+  title: string;
+  url: string;
+  domain: string;
+  summary: string;
+  persona_id: string;
+};
+
 type SessionState = {
   sessionId: string | null;
   question: string;
   phase: Phase;
   messages: DebateMessage[];
   checkpoints: ObserverCheckpoint[];
-  sources: unknown[];
+  sources: Source[];
   finalReport: string | null;
   statusMessage: string;
   error: string | null;
@@ -19,6 +28,7 @@ type SessionState = {
   setPhase: (phase: Phase) => void;
   addMessage: (msg: DebateMessage) => void;
   addCheckpoint: (cp: ObserverCheckpoint) => void;
+  addSource: (src: Omit<Source, "id">) => void;
   setFinalReport: (report: string) => void;
   setStatusMessage: (msg: string) => void;
   setError: (err: string) => void;
@@ -46,6 +56,7 @@ export const useSessionStore = create<SessionState>((set) => ({
   setPhase: (phase) => set({ phase }),
   addMessage: (msg) => set((s) => ({ messages: [...s.messages, msg] })),
   addCheckpoint: (cp) => set((s) => ({ checkpoints: [...s.checkpoints, cp] })),
+  addSource: (src) => set((s) => ({ sources: [...s.sources, src] })),
   setFinalReport: (report) => set({ finalReport: report, phase: "completed" }),
   setStatusMessage: (statusMessage) => set({ statusMessage }),
   setError: (error) => set({ error, phase: "error" }),

@@ -25,4 +25,31 @@ describe("sessionStore", () => {
     useSessionStore.getState().addMessage(msg);
     expect(useSessionStore.getState().messages).toHaveLength(1);
   });
+
+  it("accumulates sources", () => {
+    const source = {
+      title: "Example Article",
+      url: "https://example.com",
+      domain: "example.com",
+      summary: "A test article",
+      persona_id: "optimist",
+    };
+    useSessionStore.getState().addSource(source);
+    expect(useSessionStore.getState().sources).toHaveLength(1);
+    expect(useSessionStore.getState().sources[0]).toEqual(source);
+  });
+
+  it("resets sources", () => {
+    const source = {
+      title: "Example Article",
+      url: "https://example.com",
+      domain: "example.com",
+      summary: "A test article",
+      persona_id: "optimist",
+    };
+    useSessionStore.getState().addSource(source);
+    expect(useSessionStore.getState().sources).toHaveLength(1);
+    useSessionStore.getState().reset();
+    expect(useSessionStore.getState().sources).toHaveLength(0);
+  });
 });
