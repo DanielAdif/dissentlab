@@ -1,8 +1,11 @@
+import logging
 import os
 import chromadb
 from chromadb.utils import embedding_functions
 
 CHROMA_PATH = os.environ.get("CHROMA_PATH", "/data/chroma")
+_EMBED_MODEL = "all-MiniLM-L6-v2"
+_logger = logging.getLogger(__name__)
 
 _client: chromadb.Client | None = None
 _collection = None
@@ -13,7 +16,7 @@ def _get_client():
     if _client is None:
         _client = chromadb.PersistentClient(path=CHROMA_PATH)
         ef = embedding_functions.SentenceTransformerEmbeddingFunction(
-            model_name="all-MiniLM-L6-v2"
+            model_name=_EMBED_MODEL
         )
         _collection = _client.get_or_create_collection(
             "sources", embedding_function=ef
@@ -39,12 +42,13 @@ class ChromaClient:
         try:
             from sentence_transformers import SentenceTransformer, util
 
-            model = SentenceTransformer("all-MiniLM-L6-v2")
+            model = SentenceTransformer(_EMBED_MODEL)
             q_emb = model.encode(question, convert_to_tensor=True)
             t_emb = model.encode(text[:500], convert_to_tensor=True)
             score = float(util.cos_sim(q_emb, t_emb)[0][0])
             return max(0.0, min(1.0, score))
         except Exception:
+            _logger.warning("Failed to score relevance, returning fallback value")
             return 0.5
 
     def deduplicate(
