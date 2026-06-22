@@ -3,6 +3,18 @@ import json
 from datetime import datetime, timezone
 import aiosqlite
 
+# Allowlist of updatable persona fields to prevent SQL injection
+_UPDATABLE_PERSONA_FIELDS = frozenset({
+    "name",
+    "role",
+    "system_prompt",
+    "enabled",
+    "model_provider",
+    "model_name",
+    "tool_permissions",
+    "updated_at",
+})
+
 DEFAULT_PERSONAS = [
     {
         "id": "optimist",
@@ -106,6 +118,12 @@ class PersonaRepository:
     async def update(self, persona_id: str, **fields) -> dict | None:
         if not fields:
             return await self.get(persona_id)
+
+        # Validate all field names against allowlist to prevent SQL injection
+        for field_name in fields:
+            if field_name not in _UPDATABLE_PERSONA_FIELDS:
+                raise ValueError(f"Field not updatable: {field_name}")
+
         now = datetime.now(timezone.utc).isoformat()
         fields["updated_at"] = now
         set_clause = ", ".join(f"{k} = ?" for k in fields)
