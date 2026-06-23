@@ -4,14 +4,19 @@ from contextlib import asynccontextmanager
 
 DB_PATH = os.environ.get("DB_PATH", "/data/db/dissentlab.db")
 
-@asynccontextmanager
-async def get_db():
+
+async def run_migrations_once() -> None:
     db_dir = os.path.dirname(DB_PATH)
     if db_dir:
         os.makedirs(db_dir, exist_ok=True)
     async with aiosqlite.connect(DB_PATH) as db:
-        db.row_factory = aiosqlite.Row
         await run_migrations(db)
+
+
+@asynccontextmanager
+async def get_db():
+    async with aiosqlite.connect(DB_PATH) as db:
+        db.row_factory = aiosqlite.Row
         yield db
 
 async def run_migrations(db: aiosqlite.Connection) -> None:

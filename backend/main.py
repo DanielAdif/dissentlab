@@ -1,3 +1,4 @@
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from api.sessions import router as sessions_router
@@ -5,8 +6,16 @@ from api.models import router as models_router
 from api.personas import router as personas_router
 from api.settings import router as settings_router
 from api.ws import router as ws_router
+from storage.db import run_migrations_once
 
-app = FastAPI(title="DissentLab API", version="1.0.0")
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    await run_migrations_once()
+    yield
+
+
+app = FastAPI(title="DissentLab API", version="1.0.0", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
