@@ -7,7 +7,7 @@ CHROMA_PATH = os.environ.get("CHROMA_PATH", "/data/chroma")
 _EMBED_MODEL = "all-MiniLM-L6-v2"
 _logger = logging.getLogger(__name__)
 
-_client: chromadb.Client | None = None
+_client: chromadb.ClientAPI | None = None
 _collection = None
 
 

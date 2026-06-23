@@ -1,22 +1,29 @@
 from typing import AsyncIterator
-import google.generativeai as genai
+from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, SystemMessage
 from .base import BaseProvider, ModelConfig
+
+
+def _to_langchain_messages(messages: list[dict]) -> list[BaseMessage]:
+    role_map: dict[str, type[BaseMessage]] = {
+        "system": SystemMessage,
+        "user": HumanMessage,
+        "assistant": AIMessage,
+    }
+    return [role_map.get(m["role"], HumanMessage)(content=m["content"]) for m in messages]
+
 
 class GeminiProvider(BaseProvider):
     async def generate(self, messages: list[dict], config: ModelConfig) -> str:
-        genai.configure(api_key=config.api_key)
-        model = genai.GenerativeModel(config.model_name)
-        prompt = "\n".join(f"{m['role'].upper()}: {m['content']}" for m in messages)
-        response = await model.generate_content_async(prompt)
-        return response.text or ""
+        llm = ChatGoogleGenerativeAI(model=config.model_name, google_api_key=config.api_key)
+        response = await llm.ainvoke(_to_langchain_messages(messages))
+        return response.content or ""
 
     async def stream(self, messages: list[dict], config: ModelConfig) -> AsyncIterator[str]:
-        genai.configure(api_key=config.api_key)
-        model = genai.GenerativeModel(config.model_name)
-        prompt = "\n".join(f"{m['role'].upper()}: {m['content']}" for m in messages)
-        async for chunk in await model.generate_content_async(prompt, stream=True):
-            if chunk.text:
-                yield chunk.text
+        llm = ChatGoogleGenerativeAI(model=config.model_name, google_api_key=config.api_key)
+        async for chunk in llm.astream(_to_langchain_messages(messages)):
+            if chunk.content:
+                yield chunk.content
 
     @property
     def context_window(self) -> int:
