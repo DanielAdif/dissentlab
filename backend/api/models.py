@@ -21,12 +21,16 @@ class SetKeyRequest(BaseModel):
 
 @router.get("/providers")
 async def list_providers():
+    from models.providers.huggingface import _is_downloaded
     async with get_db() as db:
         repo = SettingsRepository(db)
         result = []
         for provider in PROVIDERS:
-            key_val = await repo.get(f"{provider}_api_key")
-            has_key = key_val is not None
+            if provider == "huggingface":
+                has_key = _is_downloaded()
+            else:
+                key_val = await repo.get(f"{provider}_api_key")
+                has_key = key_val is not None
             result.append({"provider": provider, "configured": has_key})
         ollama_url = await repo.get("ollama_url") or os.environ.get(
             "OLLAMA_URL", "http://host.docker.internal:11434"
