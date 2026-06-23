@@ -12,7 +12,7 @@ from models.gateway import ModelGateway, ModelConfig
 
 router = APIRouter(prefix="/api/models", tags=["models"])
 
-PROVIDERS = ["openai", "anthropic", "gemini", "moonshot", "openrouter", "ollama", "huggingface"]
+PROVIDERS = ["openai", "anthropic", "gemini", "moonshot", "openrouter", "ollama"]
 
 
 class SetKeyRequest(BaseModel):
@@ -21,16 +21,12 @@ class SetKeyRequest(BaseModel):
 
 @router.get("/providers")
 async def list_providers():
-    from models.providers.huggingface import _is_downloaded
     async with get_db() as db:
         repo = SettingsRepository(db)
         result = []
         for provider in PROVIDERS:
-            if provider == "huggingface":
-                has_key = _is_downloaded()
-            else:
-                key_val = await repo.get(f"{provider}_api_key")
-                has_key = key_val is not None
+            key_val = await repo.get(f"{provider}_api_key")
+            has_key = key_val is not None
             result.append({"provider": provider, "configured": has_key})
         ollama_url = await repo.get("ollama_url") or os.environ.get(
             "OLLAMA_URL", "http://host.docker.internal:11434"
@@ -96,14 +92,3 @@ async def test_provider(provider: str):
             return {"ok": False, "message": str(e)}
 
 
-@router.get("/download/progress")
-async def download_progress():
-    async def event_stream():
-        from models.providers.huggingface import download_model, MODEL_PATH
-        if os.path.exists(MODEL_PATH):
-            yield f"data: {json.dumps({'status': 'already_downloaded'})}\n\n"
-            return
-        async for event in download_model():
-            yield f"data: {json.dumps(event)}\n\n"
-
-    return StreamingResponse(event_stream(), media_type="text/event-stream")

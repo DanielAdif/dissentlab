@@ -6,7 +6,6 @@ from .providers.gemini import GeminiProvider
 from .providers.moonshot import MoonshotProvider
 from .providers.openrouter import OpenRouterProvider
 from .providers.ollama import OllamaProvider
-from .providers.huggingface import HuggingFaceProvider
 
 _PROVIDERS: dict[str, type[BaseProvider]] = {
     "openai": OpenAIProvider,
@@ -15,10 +14,9 @@ _PROVIDERS: dict[str, type[BaseProvider]] = {
     "moonshot": MoonshotProvider,
     "openrouter": OpenRouterProvider,
     "ollama": OllamaProvider,
-    "huggingface": HuggingFaceProvider,
 }
 
-_NO_TOOL_CALLING = {"huggingface"}
+_NO_TOOL_CALLING: set[str] = set()
 
 def _get_provider(config: ModelConfig) -> BaseProvider:
     provider_class = _PROVIDERS.get(config.provider)

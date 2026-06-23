@@ -27,7 +27,7 @@ export default function HomePage() {
   const { data: models } = useModels();
   const { data: sessions } = useSessionList();
 
-  const hasModel = (models?.providers.some((p) => p.configured) ?? false) || defaultProvider === "huggingface";
+  const hasModel = models?.providers.some((p) => p.configured) ?? false;
   const showOnboarding = models !== undefined && !hasModel;
 
   async function handleStart() {

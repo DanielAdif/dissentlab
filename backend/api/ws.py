@@ -88,19 +88,14 @@ async def debate_websocket(websocket: WebSocket, session_id: str):
             api_key_enc = await settings_repo.get(f"{provider}_api_key")
             api_key = decrypt(api_key_enc) if api_key_enc else None
 
-            if api_key is None and provider not in ("huggingface", "ollama"):
-                from models.providers.huggingface import _is_downloaded
-                if _is_downloaded():
-                    provider = "huggingface"
-                    model_name = "Qwen3-0.6B"
-                else:
-                    await websocket.send_json({
-                        "type": "error",
-                        "payload": {"message": "No API key configured. Download Qwen3-0.6B in Settings → Models or add an API key."},
-                        "timestamp": "",
-                    })
-                    await websocket.close()
-                    return
+            if api_key is None and provider != "ollama":
+                await websocket.send_json({
+                    "type": "error",
+                    "payload": {"message": "No API key configured for this provider. Add one in Settings → Models."},
+                    "timestamp": "",
+                })
+                await websocket.close()
+                return
 
             ollama_url = await settings_repo.get("ollama_url") or os.environ.get(
                 "OLLAMA_URL", "http://host.docker.internal:11434"

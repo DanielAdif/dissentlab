@@ -8,7 +8,6 @@ const MODEL_OPTIONS: Record<string, string[]> = {
   moonshot: ["moonshot-v1-8k", "moonshot-v1-32k"],
   openrouter: ["openai/gpt-4o", "anthropic/claude-sonnet-4-6"],
   ollama: ["llama3.2", "qwen2.5", "mistral"],
-  huggingface: ["Qwen3-0.6B"],
 };
 
 export function ModelSelector({
@@ -42,7 +41,6 @@ export function ModelSelector({
             {p.provider.charAt(0).toUpperCase() + p.provider.slice(1)}
           </option>
         ))}
-        <option value="huggingface">HuggingFace (local)</option>
       </select>
       <select
         value={model}

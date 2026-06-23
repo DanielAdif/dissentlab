@@ -10,7 +10,6 @@ const PROVIDER_LABELS: Record<string, string> = {
   moonshot: "Moonshot / Kimi",
   openrouter: "OpenRouter",
   ollama: "Ollama (local)",
-  huggingface: "HuggingFace (local)",
 };
 
 export default function ModelSettingsPage() {
@@ -66,7 +65,7 @@ export default function ModelSettingsPage() {
       </div>
 
       <div className="space-y-2">
-        {providers.filter((p) => p.provider !== "ollama" && p.provider !== "huggingface").map((p) => (
+        {providers.filter((p) => p.provider !== "ollama").map((p) => (
           <div key={p.provider} className="border border-border rounded-md p-4 space-y-3">
             <div className="flex items-center justify-between">
               <h2 className="text-sm font-medium text-foreground">{PROVIDER_LABELS[p.provider] ?? p.provider}</h2>
