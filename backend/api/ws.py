@@ -12,6 +12,7 @@ from storage.repositories.checkpoints import CheckpointRepository
 from storage.repositories.reports import ReportRepository
 from models.gateway import ModelConfig
 from graph.graph import build_graph
+from graph.nodes import register_queue, unregister_queue
 from graph.state import CouncilState
 from security.encryption import decrypt
 
@@ -133,9 +134,10 @@ async def debate_websocket(websocket: WebSocket, session_id: str):
                 "user_stop_requested": False,
                 "model_config": model_config,
                 "error": None,
-                "_event_queue": event_queue,  # type: ignore[typeddict-unknown-key]
+                "_raw_sources": [],
             }
 
+            register_queue(session_id, event_queue)
             await session_repo.update_status(session_id, "running")
 
             async def run_graph():
@@ -217,6 +219,7 @@ async def debate_websocket(websocket: WebSocket, session_id: str):
     except Exception as e:
         await send_event({"type": "error", "payload": {"message": str(e)}, "timestamp": ""})
     finally:
+        unregister_queue(session_id)
         try:
             await websocket.close()
         except Exception:

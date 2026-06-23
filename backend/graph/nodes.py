@@ -21,6 +21,18 @@ _MAX_ROUNDS = {"quick": 1, "standard": 5, "deep_dive": 15}
 _CONSENSUS_THRESHOLD = 0.75
 _REPETITION_THRESHOLD = 0.85
 
+# Registry mapping session_id → asyncio.Queue so events survive LangGraph's
+# state channel serialization (undeclared TypedDict keys are stripped).
+_session_queues: dict[str, asyncio.Queue] = {}
+
+
+def register_queue(session_id: str, queue: asyncio.Queue) -> None:
+    _session_queues[session_id] = queue
+
+
+def unregister_queue(session_id: str) -> None:
+    _session_queues.pop(session_id, None)
+
 
 def _get_model_config(state: CouncilState) -> ModelConfig:
     mc = state["model_config"]
@@ -33,14 +45,13 @@ def _get_model_config(state: CouncilState) -> ModelConfig:
 
 
 def _emit(state: CouncilState, event_type: str, payload: dict) -> None:
-    queue: asyncio.Queue | None = state.get("_event_queue")
+    queue = _session_queues.get(state["session_id"])
     if queue:
-        event = {
+        queue.put_nowait({
             "type": event_type,
             "payload": payload,
             "timestamp": datetime.now(timezone.utc).isoformat(),
-        }
-        queue.put_nowait(event)
+        })
 
 
 async def node_validate_input(state: CouncilState) -> CouncilState:
