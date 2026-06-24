@@ -15,7 +15,7 @@ export function ModelSetupCard() {
         </div>
         <button
           onClick={() => router.push("/settings/models")}
-          className="w-full py-3 rounded-md bg-accent text-white font-medium hover:bg-accent/90 transition-colors"
+          className="w-full py-3 rounded-md bg-foreground text-background font-medium hover:bg-foreground/90 transition-colors"
         >
           Go to Model Settings
         </button>

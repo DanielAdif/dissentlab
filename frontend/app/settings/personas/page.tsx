@@ -60,7 +60,7 @@ export default function PersonasPage() {
               setIsCreating(true);
               setNewDraft(emptyDraft);
             }}
-            className="text-xs bg-accent text-white rounded px-3 py-1.5 hover:opacity-90 transition-opacity"
+            className="text-xs bg-foreground text-background rounded px-3 py-1.5 hover:opacity-90 transition-opacity"
           >
             Add Persona
           </button>
@@ -100,7 +100,7 @@ export default function PersonasPage() {
             <button
               onClick={handleCreate}
               disabled={createPersona.isPending}
-              className="text-xs bg-accent text-white rounded px-3 py-1.5 disabled:opacity-50"
+              className="text-xs bg-foreground text-background rounded px-3 py-1.5 disabled:opacity-50"
             >
               {createPersona.isPending ? "Creating…" : "Create"}
             </button>
@@ -193,7 +193,7 @@ export default function PersonasPage() {
                     type="button"
                     onClick={() => saveEdit(p.id)}
                     disabled={updatePersona.isPending}
-                    className="text-xs bg-accent text-white rounded px-3 py-1.5 disabled:opacity-50"
+                    className="text-xs bg-foreground text-background rounded px-3 py-1.5 disabled:opacity-50"
                   >
                     {updatePersona.isPending ? "Saving…" : "Save"}
                   </button>

@@ -54,7 +54,7 @@ export default function ModelSettingsPage() {
             placeholder="http://host.docker.internal:11434"
             className="flex-1 bg-background border border-border rounded px-3 py-1.5 text-sm text-foreground focus:outline-none focus:border-accent"
           />
-          <button onClick={handleSaveOllama} className="text-xs bg-accent text-white rounded px-3 py-1.5">Save</button>
+          <button onClick={handleSaveOllama} className="text-xs bg-foreground text-background rounded px-3 py-1.5">Save</button>
           <button onClick={() => handleTest("ollama")} className="text-xs border border-border rounded px-3 py-1.5 text-muted hover:border-foreground/30">Test</button>
         </div>
         {testResults["ollama"] && (
@@ -81,7 +81,7 @@ export default function ModelSettingsPage() {
                 placeholder={p.configured ? "Update API key…" : "Enter API key…"}
                 className="flex-1 bg-background border border-border rounded px-3 py-1.5 text-sm text-foreground focus:outline-none focus:border-accent"
               />
-              <button onClick={() => handleSaveKey(p.provider)} className="text-xs bg-accent text-white rounded px-3 py-1.5">Save</button>
+              <button onClick={() => handleSaveKey(p.provider)} className="text-xs bg-foreground text-background rounded px-3 py-1.5">Save</button>
               {p.configured && (
                 <>
                   <button onClick={() => handleTest(p.provider)} className="text-xs border border-border rounded px-3 py-1.5 text-muted hover:border-foreground/30">Test</button>
