@@ -58,6 +58,7 @@ All changes land in `frontend/tailwind.config.ts`.
 | `bubble-2` | `#1e1e1e` | Pessimist bubble background |
 | `bubble-3` | `#232323` | Contrarian bubble background |
 | `bubble-4` | `#282828` | Observer bubble background |
+| `checkpoint` | `#1f1f1f` | Observer checkpoint card background |
 
 Persona avatar circles carry the primary visual distinction between personas. Bubble backgrounds provide a subtle secondary reinforcement.
 
