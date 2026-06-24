@@ -1,7 +1,6 @@
 "use client";
 import { useState } from "react";
 import { useSessionStore } from "@/stores/sessionStore";
-import { getPersonaColor } from "@/lib/utils";
 
 export function SourcePanel() {
   const [open, setOpen] = useState(false);
@@ -31,9 +30,7 @@ export function SourcePanel() {
                 >
                   {src.title || src.domain}
                 </a>
-                <span className={`text-xs ${getPersonaColor(src.persona_id).split(" ")[0]}`}>
-                  {src.persona_id}
-                </span>
+                <span className="text-xs text-muted">{src.persona_id}</span>
               </div>
               <div className="text-xs text-muted">{src.domain}</div>
             </div>
