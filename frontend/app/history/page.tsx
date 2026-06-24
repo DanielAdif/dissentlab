@@ -14,9 +14,9 @@ export default function HistoryPage() {
   });
 
   const STATUS_COLORS: Record<string, string> = {
-    completed: "text-optimist",
-    running: "text-contrarian",
-    error: "text-pessimist",
+    completed: "text-foreground",
+    running: "text-accent",
+    error: "text-muted",
     pending: "text-muted",
   };
 
@@ -45,7 +45,7 @@ export default function HistoryPage() {
             <span className={`text-xs shrink-0 ${STATUS_COLORS[s.status] ?? "text-muted"}`}>{s.status}</span>
             <button
               onClick={() => { if (confirm("Delete this session?")) deleteSession.mutate(s.id); }}
-              className="text-xs text-muted hover:text-pessimist transition-colors shrink-0"
+              className="text-xs text-muted hover:text-foreground transition-colors shrink-0"
             >
               Delete
             </button>

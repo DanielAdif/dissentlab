@@ -26,7 +26,7 @@ export function IntensitySelector({
             className={cn(
               "flex-1 py-2 px-3 rounded-md border text-sm transition-colors",
               value === opt.value
-                ? "border-accent bg-accent/10 text-accent"
+                ? "border-foreground bg-foreground/10 text-foreground"
                 : "border-border text-muted hover:border-foreground/30 hover:text-foreground"
             )}
           >
@@ -36,7 +36,7 @@ export function IntensitySelector({
         ))}
       </div>
       {value === "deep_dive" && (
-        <p className="text-xs text-contrarian mt-2">
+        <p className="text-xs text-muted mt-2">
           Deep Dive runs up to 15 rounds and may use significantly more API tokens.
         </p>
       )}

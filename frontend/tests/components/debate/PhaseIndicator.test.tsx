@@ -20,12 +20,12 @@ describe("PhaseIndicator", () => {
     expect(screen.getByText("Debate")).toBeDefined();
   });
 
-  it("applies accent class to active phases", () => {
+  it("applies foreground class to active phases", () => {
     render(<PhaseIndicator phase="positions" round={0} />);
-    // "Researching" and "Initial Positions" should both render as accent (active or prior)
+    // "Researching" and "Initial Positions" should both render as foreground (active or prior)
     const researching = screen.getByText("Researching");
     const initialPositions = screen.getByText("Initial Positions");
-    expect(researching.className).toContain("text-accent");
-    expect(initialPositions.className).toContain("text-accent");
+    expect(researching.className).toContain("text-foreground");
+    expect(initialPositions.className).toContain("text-foreground");
   });
 });

@@ -13,7 +13,7 @@ export function PhaseIndicator({ phase, round }: { phase: Phase; round: number }
     <div className="flex items-center gap-2 text-xs text-muted">
       {PHASES.map((p, i) => (
         <span key={p.key} className="flex items-center gap-2">
-          <span className={i <= activeIndex ? "text-accent font-medium" : ""}>
+          <span className={i <= activeIndex ? "text-foreground font-medium" : ""}>
             {p.key === "debating" && round > 0 ? `Round ${round}` : p.label}
           </span>
           {i < PHASES.length - 1 && <span className="text-border">→</span>}
