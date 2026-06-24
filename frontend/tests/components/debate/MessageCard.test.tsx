@@ -50,4 +50,9 @@ describe("MessageCard", () => {
     render(<MessageCard message={baseMessage} />);
     expect(screen.getByText("· High")).toBeDefined();
   });
+
+  it("renders avatar initials from persona name", () => {
+    render(<MessageCard message={baseMessage} />);
+    expect(screen.getByText("OP")).toBeDefined(); // "Optimist".slice(0, 2).toUpperCase()
+  });
 });
