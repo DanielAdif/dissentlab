@@ -1,13 +1,10 @@
-import { getPersonaColor } from "@/lib/utils";
 import type { DebateMessage } from "@/lib/api";
 
 export function MessageCard({ message }: { message: DebateMessage }) {
-  const color = getPersonaColor(message.persona_id);
-  const [textClass, borderClass] = color.split(" ");
   return (
-    <div className={`border-l-2 pl-4 py-1 ${borderClass ?? "border-border"}`}>
+    <div className="border-l-2 pl-4 py-1 border-border">
       <div className="flex items-baseline gap-2 mb-1">
-        <span className={`text-sm font-semibold ${textClass ?? "text-foreground"}`}>
+        <span className="text-sm font-semibold text-foreground">
           {message.persona_name}
         </span>
         {message.round_number > 0 && (
