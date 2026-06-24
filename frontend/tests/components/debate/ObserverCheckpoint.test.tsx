@@ -20,7 +20,7 @@ describe("ObserverCheckpointCard", () => {
 
   it("renders consensus percentage", () => {
     render(<ObserverCheckpointCard checkpoint={baseCheckpoint} />);
-    expect(screen.getByText("Consensus: 65%")).toBeDefined();
+    expect(screen.getByText("65%")).toBeDefined();
   });
 
   it("renders agreements", () => {
