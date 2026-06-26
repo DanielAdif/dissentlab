@@ -53,19 +53,21 @@ export default function SessionPage({ params }: { params: Promise<{ id: string }
 
   return (
     <div className="flex flex-col h-full">
-      <div className="sticky top-0 z-10 bg-sidebar border-b border-border px-4 py-3 flex items-center gap-4 shrink-0">
-        <p className="text-sm text-foreground flex-1 truncate">{store.question}</p>
-        <PhaseIndicator phase={store.phase} round={currentRound} />
-        <div className="flex gap-2 shrink-0">
+      <div className="sticky top-0 z-10 bg-surface/80 backdrop-blur-sm border-b border-border px-5 py-3 flex items-start gap-4 shrink-0">
+        <p className="font-serif italic text-[15px] text-foreground flex-1 truncate leading-snug">
+          {store.question}
+        </p>
+        <div className="flex items-center gap-3 shrink-0 pt-0.5">
+          <PhaseIndicator phase={store.phase} round={currentRound} />
           <button
             onClick={() => store.setAutoScroll(!store.autoScroll)}
-            className="text-xs text-muted border border-border rounded px-2 py-1 hover:border-foreground/30 transition-colors"
+            className="text-[11px] text-muted border border-border rounded px-2 py-1 hover:text-foreground hover:border-foreground/30 transition-colors"
           >
             {store.autoScroll ? "Pause scroll" : "Resume scroll"}
           </button>
           <button
             onClick={sendStop}
-            className="text-xs text-muted border border-border rounded px-2 py-1 hover:border-foreground/30 transition-colors"
+            className="text-[11px] text-muted border border-border rounded px-2 py-1 hover:text-foreground hover:border-foreground/30 transition-colors"
           >
             Stop
           </button>
