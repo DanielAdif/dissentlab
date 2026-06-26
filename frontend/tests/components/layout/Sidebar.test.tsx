@@ -23,9 +23,9 @@ describe("Sidebar", () => {
     expect(screen.getByText("DissentLab")).toBeDefined();
   });
 
-  it("renders New Session link", () => {
+  it("renders New debate link", () => {
     wrap(<Sidebar />);
-    expect(screen.getByText("+ New Session")).toBeDefined();
+    expect(screen.getByText("+ New debate")).toBeDefined();
   });
 
   it("renders nav links", () => {
@@ -38,5 +38,10 @@ describe("Sidebar", () => {
   it("renders session question in list", () => {
     wrap(<Sidebar />);
     expect(screen.getByText("Is AI safe?")).toBeDefined();
+  });
+
+  it("renders theme toggle button", () => {
+    wrap(<Sidebar />);
+    expect(screen.getByRole("button", { name: /switch to (light|dark) mode/i })).toBeDefined();
   });
 });
