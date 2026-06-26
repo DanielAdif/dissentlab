@@ -4,22 +4,22 @@
 
 @layer base {
   :root {
-    --bg:             #f7f7f5;
-    --surface:        #eeebe6;
-    --surface-raised: #ffffff;
-    --border:         #dedad5;
-    --text:           #1a1817;
-    --text-dim:       #8a857e;
+    --bg:             247 247 245;
+    --surface:        238 235 230;
+    --surface-raised: 255 255 255;
+    --border:         222 218 213;
+    --text:           26 24 23;
+    --text-dim:       138 133 126;
     color-scheme: light;
   }
 
   .dark {
-    --bg:             #0d0d0b;
-    --surface:        #141411;
-    --surface-raised: #1c1c19;
-    --border:         #2a2a26;
-    --text:           #e8e4de;
-    --text-dim:       #6b6560;
+    --bg:             13 13 11;
+    --surface:        20 20 17;
+    --surface-raised: 28 28 25;
+    --border:         42 42 38;
+    --text:           232 228 222;
+    --text-dim:       107 101 96;
     color-scheme: dark;
   }
 

@@ -10,17 +10,17 @@ const config: Config = {
     extend: {
       colors: {
         // Primary token names (new)
-        background:       "var(--bg)",
-        foreground:       "var(--text)",
-        surface:          "var(--surface)",
-        "surface-raised": "var(--surface-raised)",
-        border:           "var(--border)",
-        muted:            "var(--text-dim)",
+        background:       "rgb(var(--bg) / <alpha-value>)",
+        foreground:       "rgb(var(--text) / <alpha-value>)",
+        surface:          "rgb(var(--surface) / <alpha-value>)",
+        "surface-raised": "rgb(var(--surface-raised) / <alpha-value>)",
+        border:           "rgb(var(--border) / <alpha-value>)",
+        muted:            "rgb(var(--text-dim) / <alpha-value>)",
         // Backward-compat aliases — untouched components still compile
-        card:             "var(--surface-raised)",
-        sidebar:          "var(--surface)",
-        checkpoint:       "var(--surface)",
-        accent:           "var(--text-dim)",
+        card:             "rgb(var(--surface-raised) / <alpha-value>)",
+        sidebar:          "rgb(var(--surface) / <alpha-value>)",
+        checkpoint:       "rgb(var(--surface) / <alpha-value>)",
+        accent:           "rgb(var(--text-dim) / <alpha-value>)",
         // Persona voice stripes — fixed warm-gray values, same in both modes
         "stripe-optimist":   "#9b8f82",
         "stripe-pessimist":  "#5f5550",

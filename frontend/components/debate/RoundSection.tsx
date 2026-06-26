@@ -14,7 +14,7 @@ export function RoundSection({ label, children }: Props) {
       <button
         type="button"
         onClick={() => setCollapsed(!collapsed)}
-        className="flex items-center gap-3 py-3 w-full text-left select-none"
+        className="flex items-center gap-3 py-3 w-full text-left select-none group"
       >
         <span className="text-[10px] font-medium uppercase tracking-[0.08em] text-muted whitespace-nowrap">
           {label}
