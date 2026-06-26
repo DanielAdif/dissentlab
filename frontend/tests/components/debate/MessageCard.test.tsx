@@ -1,3 +1,4 @@
+/* frontend/tests/components/debate/MessageCard.test.tsx */
 import { describe, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { MessageCard } from "@/components/debate/MessageCard";
@@ -24,15 +25,16 @@ describe("MessageCard", () => {
     expect(screen.getByText("This looks promising.")).toBeDefined();
   });
 
-  it("renders round number when > 0", () => {
+  it("renders round number and confidence together when round > 0", () => {
     render(<MessageCard message={baseMessage} />);
-    expect(screen.getByText("Round 1")).toBeDefined();
+    expect(screen.getByText("Round 1 · High")).toBeDefined();
   });
 
-  it("does not render round label when round_number is 0", () => {
+  it("renders only confidence when round_number is 0", () => {
     const msg = { ...baseMessage, round_number: 0 };
     render(<MessageCard message={msg} />);
     expect(screen.queryByText(/Round/)).toBeNull();
+    expect(screen.getByText("High")).toBeDefined();
   });
 
   it("renders cited sources", () => {
@@ -46,13 +48,8 @@ describe("MessageCard", () => {
     expect(screen.queryByText("source-a")).toBeNull();
   });
 
-  it("renders confidence", () => {
-    render(<MessageCard message={baseMessage} />);
-    expect(screen.getByText("· High")).toBeDefined();
-  });
-
   it("renders avatar initials from persona name", () => {
     render(<MessageCard message={baseMessage} />);
-    expect(screen.getByText("OP")).toBeDefined(); // "Optimist".slice(0, 2).toUpperCase()
+    expect(screen.getByText("OP")).toBeDefined();
   });
 });
