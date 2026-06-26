@@ -13,9 +13,9 @@ const baseCheckpoint: ObserverCheckpoint = {
 };
 
 describe("ObserverCheckpointCard", () => {
-  it("renders round number", () => {
+  it("renders observer label", () => {
     render(<ObserverCheckpointCard checkpoint={baseCheckpoint} />);
-    expect(screen.getByText(/Observer — Round 2/)).toBeDefined();
+    expect(screen.getByText("OBSERVER")).toBeDefined();
   });
 
   it("renders consensus percentage", () => {
@@ -48,5 +48,17 @@ describe("ObserverCheckpointCard", () => {
     const cp = { ...baseCheckpoint, disagreements: [] };
     render(<ObserverCheckpointCard checkpoint={cp} />);
     expect(screen.queryByText("Disagreements")).toBeNull();
+  });
+
+  it("does not render consensus bar when consensus_score is 0", () => {
+    const cp = { ...baseCheckpoint, consensus_score: 0 };
+    render(<ObserverCheckpointCard checkpoint={cp} />);
+    expect(screen.queryByText("Consensus")).toBeNull();
+  });
+
+  it("does not render consensus bar when consensus_score is absent", () => {
+    const cp = { ...baseCheckpoint, consensus_score: 0 };
+    render(<ObserverCheckpointCard checkpoint={cp} />);
+    expect(screen.queryByText("0%")).toBeNull();
   });
 });
