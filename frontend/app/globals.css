@@ -4,22 +4,24 @@
 
 @layer base {
   :root {
-    --bg:             247 247 245;
-    --surface:        238 235 230;
-    --surface-raised: 255 255 255;
-    --border:         222 218 213;
-    --text:           26 24 23;
-    --text-dim:       138 133 126;
+    --bg:             240 235 225;
+    --surface:        237 232 222;
+    --surface-raised: 250 248 244;
+    --border:         216 209 197;
+    --text:           28 24 20;
+    --text-dim:       122 112 103;
+    --accent:         176 114 40;
     color-scheme: light;
   }
 
   .dark {
-    --bg:             13 13 11;
-    --surface:        20 20 17;
-    --surface-raised: 28 28 25;
-    --border:         42 42 38;
-    --text:           232 228 222;
-    --text-dim:       107 101 96;
+    --bg:             18 16 13;
+    --surface:        26 22 18;
+    --surface-raised: 34 29 24;
+    --border:         52 46 40;
+    --text:           232 228 220;
+    --text-dim:       138 130 120;
+    --accent:         176 114 40;
     color-scheme: dark;
   }
 
@@ -30,11 +32,54 @@
   * {
     @apply border-border;
   }
+
+  textarea::placeholder {
+    font-family: var(--font-playfair), Georgia, serif;
+    font-style: italic;
+  }
+
+  select {
+    appearance: none;
+    -webkit-appearance: none;
+  }
 }
 
 @layer utilities {
   .scrollbar-thin {
     scrollbar-width: thin;
-    scrollbar-color: var(--border) transparent;
+    scrollbar-color: rgb(var(--border)) transparent;
   }
+
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 5px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: rgb(var(--border));
+    border-radius: 4px;
+  }
+}
+
+@keyframes msgIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes verdictIn {
+  from { opacity: 0; transform: translateY(14px) scale(0.985); }
+  to   { opacity: 1; transform: none; }
+}
+
+@keyframes homeIn {
+  from { opacity: 0; transform: translateY(28px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes dotBounce {
+  0%, 80%, 100% { transform: scale(0.6); opacity: 0.3; }
+  40%           { transform: scale(1);   opacity: 1; }
 }

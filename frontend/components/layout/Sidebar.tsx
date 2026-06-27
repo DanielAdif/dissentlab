@@ -2,14 +2,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useSessionList } from "@/hooks/useSession";
 import { cn } from "@/lib/utils";
-
-const NAV_LINKS = [
-  { href: "/settings/models", label: "Models" },
-  { href: "/settings/personas", label: "Personas" },
-  { href: "/history", label: "History" },
-];
 
 function ThemeToggle() {
   const [isDark, setIsDark] = useState(false);
@@ -39,62 +32,40 @@ function ThemeToggle() {
 
 export function Sidebar() {
   const pathname = usePathname();
-  const { data: sessions } = useSessionList();
 
   return (
-    <aside className="w-[240px] shrink-0 h-screen flex flex-col border-r border-border bg-surface overflow-y-auto scrollbar-thin">
-      <div className="px-4 py-4 shrink-0 flex items-center justify-between">
-        <span className="text-[13px] font-bold tracking-tight text-foreground">DissentLab</span>
-        <ThemeToggle />
-      </div>
-
+    <nav className="h-[46px] shrink-0 bg-surface border-b border-border flex items-center px-[18px] z-40">
       <Link
         href="/"
-        className="px-4 py-2 text-[13px] text-muted hover:text-foreground transition-colors shrink-0"
+        className="font-serif text-[15px] font-bold tracking-[0.07em] text-foreground hover:opacity-80 transition-opacity"
       >
-        + New debate
+        <span>DISSENT</span>
+        <span className="text-accent">LAB</span>
       </Link>
-
-      <div className="px-4 pt-3 pb-1 shrink-0">
-        <span className="text-[10px] font-medium uppercase tracking-[0.08em] text-muted">
-          Recent
-        </span>
-      </div>
-
-      <div className="flex-1 overflow-y-auto py-1 scrollbar-thin">
-        {sessions?.slice(0, 30).map((s) => {
-          const isActive = pathname === `/session/${s.id}`;
-          return (
-            <Link
-              key={s.id}
-              href={`/session/${s.id}`}
-              className={cn(
-                "block px-4 py-2 mx-2 rounded-md text-[13px] truncate transition-colors",
-                isActive
-                  ? "bg-surface-raised text-foreground"
-                  : "text-muted hover:text-foreground hover:bg-surface-raised"
-              )}
-            >
-              {s.question}
-            </Link>
-          );
-        })}
-      </div>
-
-      <div className="border-t border-border py-2 shrink-0">
-        {NAV_LINKS.map(({ href, label }) => (
-          <Link
-            key={href}
-            href={href}
-            className={cn(
-              "block px-4 py-2 text-[12px] transition-colors",
-              pathname === href ? "text-foreground" : "text-muted hover:text-foreground"
-            )}
-          >
-            {label}
-          </Link>
-        ))}
-      </div>
-    </aside>
+      <div className="w-px h-[14px] bg-border mx-4" />
+      <Link
+        href="/history"
+        className={cn(
+          "text-[12px] px-2 py-1 rounded-[5px] transition-colors",
+          pathname === "/history" ? "text-foreground" : "text-muted hover:text-foreground"
+        )}
+      >
+        History
+      </Link>
+      <Link
+        href="/settings/models"
+        className={cn(
+          "text-[12px] px-2 py-1 rounded-[5px] transition-colors",
+          pathname?.startsWith("/settings") ? "text-foreground" : "text-muted hover:text-foreground"
+        )}
+      >
+        Settings
+      </Link>
+      <div className="flex-1" />
+      <ThemeToggle />
+      <span className="text-[10px] text-muted/70 tracking-[0.06em] ml-3 select-none">
+        AI COUNCIL · v1
+      </span>
+    </nav>
   );
 }

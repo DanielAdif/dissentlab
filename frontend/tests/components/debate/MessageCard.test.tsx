@@ -15,41 +15,45 @@ const baseMessage: DebateMessage = {
 };
 
 describe("MessageCard", () => {
-  it("renders persona name", () => {
-    render(<MessageCard message={baseMessage} />);
+  it("renders persona name from style lookup", () => {
+    render(<MessageCard message={baseMessage} personaId="optimist" />);
     expect(screen.getByText("Optimist")).toBeDefined();
   });
 
   it("renders content", () => {
-    render(<MessageCard message={baseMessage} />);
+    render(<MessageCard message={baseMessage} personaId="optimist" />);
     expect(screen.getByText("This looks promising.")).toBeDefined();
   });
 
-  it("renders round number and confidence together when round > 0", () => {
-    render(<MessageCard message={baseMessage} />);
-    expect(screen.getByText("Round 1 · High")).toBeDefined();
-  });
-
-  it("renders only confidence when round_number is 0", () => {
-    const msg = { ...baseMessage, round_number: 0 };
-    render(<MessageCard message={msg} />);
-    expect(screen.queryByText(/Round/)).toBeNull();
+  it("renders confidence badge", () => {
+    render(<MessageCard message={baseMessage} personaId="optimist" />);
     expect(screen.getByText("High")).toBeDefined();
   });
 
+  it("renders waiting placeholder when no message", () => {
+    render(<MessageCard personaId="optimist" />);
+    expect(screen.getByText("Preparing position…")).toBeDefined();
+  });
+
   it("renders cited sources", () => {
-    render(<MessageCard message={baseMessage} />);
+    render(<MessageCard message={baseMessage} personaId="optimist" />);
     expect(screen.getByText("source-a")).toBeDefined();
   });
 
   it("does not render sources section when empty", () => {
     const msg = { ...baseMessage, cited_sources: [] };
-    render(<MessageCard message={msg} />);
+    render(<MessageCard message={msg} personaId="optimist" />);
     expect(screen.queryByText("source-a")).toBeNull();
   });
 
-  it("renders avatar initials from persona name", () => {
-    render(<MessageCard message={baseMessage} />);
-    expect(screen.getByText("OP")).toBeDefined();
+  it("renders persona symbol in avatar", () => {
+    render(<MessageCard message={baseMessage} personaId="optimist" />);
+    expect(screen.getByText("O")).toBeDefined();
+  });
+
+  it("renders different persona correctly", () => {
+    render(<MessageCard message={{ ...baseMessage, persona_id: "pessimist" }} personaId="pessimist" />);
+    expect(screen.getByText("Pessimist")).toBeDefined();
+    expect(screen.getByText("P")).toBeDefined();
   });
 });

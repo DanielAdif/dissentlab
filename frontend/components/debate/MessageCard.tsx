@@ -1,33 +1,54 @@
-/* frontend/components/debate/MessageCard.tsx */
 import { getPersonaStyle } from "@/lib/utils";
 import type { DebateMessage } from "@/lib/api";
+import { cn } from "@/lib/utils";
 
-export function MessageCard({ message }: { message: DebateMessage }) {
-  const style = getPersonaStyle(message.persona_id);
-  const initials = message.persona_name.slice(0, 2).toUpperCase();
-  const metadata =
-    message.round_number > 0
-      ? `Round ${message.round_number} · ${message.confidence}`
-      : message.confidence;
+type Props = {
+  message?: DebateMessage;
+  personaId: string;
+};
+
+export function MessageCard({ message, personaId }: Props) {
+  const style = getPersonaStyle(personaId);
+  const isWaiting = !message;
 
   return (
     <div
-      className="bg-surface-raised rounded-lg pl-4 pr-4 py-3 border-l-2"
-      style={{ borderLeftColor: style.stripeColor }}
+      className={cn("rounded-lg px-[13px] py-3 border border-l-[3px] min-h-[88px] animate-msg-in")}
+      style={{
+        background: isWaiting ? "#F0EBE8" : style.bg,
+        borderColor: isWaiting ? "#DDD5CB" : style.color + "33",
+        borderLeftColor: style.color,
+      }}
     >
-      <div className="flex items-center gap-2.5">
-        <div className="w-[22px] h-[22px] rounded-full bg-surface flex items-center justify-center shrink-0">
-          <span className="text-[10px] font-semibold text-muted">{initials}</span>
+      <div className="flex items-center gap-[7px] mb-2">
+        <div
+          className="w-[22px] h-[22px] rounded-full flex items-center justify-center shrink-0 border-[1.5px]"
+          style={{ background: style.bg, borderColor: style.color }}
+        >
+          <span
+            className="font-serif text-[10px] font-medium"
+            style={{ color: style.color }}
+          >
+            {style.symbol}
+          </span>
         </div>
-        <span className="text-[13px] font-semibold text-foreground">{message.persona_name}</span>
-        <span className="flex-1" />
-        <span className="text-[11px] text-muted">{metadata}</span>
+        <span className="font-serif text-[11.5px] font-semibold text-foreground flex-1 min-w-0 truncate">
+          {style.name}
+        </span>
+        {message && (
+          <span className="text-[9.5px] text-muted shrink-0">{message.confidence}</span>
+        )}
       </div>
-      <p className="text-[14px] leading-[1.65] text-foreground/90 whitespace-pre-wrap mt-2 ml-8">
-        {message.content}
+      <p
+        className={cn(
+          "text-[12.5px] leading-[1.72]",
+          isWaiting ? "text-muted italic" : "text-foreground"
+        )}
+      >
+        {message ? message.content : "Preparing position…"}
       </p>
-      {message.cited_sources.length > 0 && (
-        <div className="mt-1.5 ml-8 flex flex-wrap gap-1">
+      {message && message.cited_sources.length > 0 && (
+        <div className="mt-1.5 flex flex-wrap gap-1">
           {message.cited_sources.map((s) => (
             <span
               key={s}
