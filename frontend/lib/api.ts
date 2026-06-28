@@ -74,6 +74,8 @@ export const api = {
 
   listProviders: () => request<{ providers: Provider[]; ollama_url: string }>("/api/models/providers"),
 
+  listOllamaModels: () => request<{ models: string[] }>("/api/models/ollama/models"),
+
   setApiKey: (provider: string, key: string) =>
     request<{ provider: string; masked: string }>(`/api/models/keys/${provider}`, { method: "POST", body: JSON.stringify({ key }) }),
 

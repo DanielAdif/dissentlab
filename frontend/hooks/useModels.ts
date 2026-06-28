@@ -31,3 +31,12 @@ export function useTestProvider() {
     mutationFn: (provider: string) => api.testProvider(provider),
   });
 }
+
+export function useOllamaModels(enabled: boolean) {
+  return useQuery({
+    queryKey: ["ollama-models"],
+    queryFn: api.listOllamaModels,
+    enabled,
+    staleTime: 30_000,
+  });
+}

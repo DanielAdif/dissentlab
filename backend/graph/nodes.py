@@ -1,6 +1,25 @@
 import json
+import re
 import uuid
 import asyncio
+
+
+def _extract_json(raw: str) -> dict:
+    text = raw.strip()
+    # Strip ```json ... ``` or ``` ... ``` fences
+    text = re.sub(r"^```(?:json)?\s*", "", text)
+    text = re.sub(r"\s*```$", "", text)
+    text = text.strip()
+    try:
+        return json.loads(text)
+    except json.JSONDecodeError:
+        pass
+    # Fall back to extracting the first {...} block from surrounding prose
+    start = text.find("{")
+    end = text.rfind("}")
+    if start != -1 and end > start:
+        return json.loads(text[start:end + 1])
+    raise json.JSONDecodeError("No JSON object found", text, 0)
 from datetime import datetime, timezone
 from models.gateway import ModelGateway, ModelConfig
 from agents.base import (
@@ -93,11 +112,11 @@ async def node_initial_positions(state: CouncilState) -> CouncilState:
         try:
             raw = await gateway.generate(messages, config)
             try:
-                parsed = json.loads(raw)
+                parsed = _extract_json(raw)
                 content = parsed.get("argument", raw)
                 confidence = parsed.get("confidence", "Medium")
                 cited = parsed.get("evidence_used", [])
-            except json.JSONDecodeError:
+            except (json.JSONDecodeError, ValueError):
                 content = raw
                 confidence = "Medium"
                 cited = []
@@ -147,11 +166,11 @@ async def node_debate_round(state: CouncilState) -> CouncilState:
         try:
             raw = await gateway.generate(messages, config)
             try:
-                parsed = json.loads(raw)
+                parsed = _extract_json(raw)
                 content = parsed.get("argument", raw)
                 confidence = parsed.get("confidence", "Medium")
                 cited = parsed.get("evidence_used", [])
-            except json.JSONDecodeError:
+            except (json.JSONDecodeError, ValueError):
                 content = raw
                 confidence = "Medium"
                 cited = []
@@ -199,7 +218,7 @@ async def node_observer_checkpoint(state: CouncilState) -> CouncilState:
 
     try:
         raw = await gateway.generate(messages, config)
-        parsed = json.loads(raw)
+        parsed = _extract_json(raw)
         consensus_score = float(parsed.get("consensus_score", 0.5))
         repetition_score = float(parsed.get("repetition_score", 0.0))
         agreements = parsed.get("agreements", [])

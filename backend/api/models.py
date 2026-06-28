@@ -25,6 +25,9 @@ async def list_providers():
         repo = SettingsRepository(db)
         result = []
         for provider in PROVIDERS:
+            if provider == "ollama":
+                result.append({"provider": provider, "configured": True})
+                continue
             key_val = await repo.get(f"{provider}_api_key")
             has_key = key_val is not None
             result.append({"provider": provider, "configured": has_key})
@@ -51,6 +54,25 @@ async def delete_api_key(provider: str):
     async with get_db() as db:
         repo = SettingsRepository(db)
         await repo.delete(f"{provider}_api_key")
+
+
+@router.get("/ollama/models")
+async def list_ollama_models():
+    async with get_db() as db:
+        repo = SettingsRepository(db)
+        ollama_url = await repo.get("ollama_url") or os.environ.get(
+            "OLLAMA_URL", "http://host.docker.internal:11434"
+        )
+        import httpx
+        try:
+            async with httpx.AsyncClient(timeout=5) as client:
+                r = await client.get(f"{ollama_url}/api/tags")
+                r.raise_for_status()
+                data = r.json()
+                models = [m["name"] for m in data.get("models", [])]
+                return {"models": models}
+        except Exception:
+            return {"models": []}
 
 
 @router.get("/test/{provider}")

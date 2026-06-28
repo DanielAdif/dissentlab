@@ -41,7 +41,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="flex flex-col h-screen overflow-hidden">
         <Providers>
           <Sidebar />
-          <div className="flex-1 min-h-0 relative overflow-hidden">
+          <div className="flex-1 min-h-0 relative overflow-y-auto">
             {children}
           </div>
         </Providers>
