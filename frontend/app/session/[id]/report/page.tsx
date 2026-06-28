@@ -5,16 +5,32 @@ import { useSession } from "@/hooks/useSession";
 import { useSessionStore } from "@/stores/sessionStore";
 import { ExportButton } from "@/components/report/ExportButton";
 
+function renderInline(text: string): React.ReactNode {
+  const parts = text.split(/(\*\*[^*]+\*\*)/);
+  return parts.map((part, j) =>
+    part.startsWith("**") && part.endsWith("**")
+      ? <strong key={j} className="font-semibold text-foreground">{part.slice(2, -2)}</strong>
+      : part
+  );
+}
+
 function renderMarkdown(md: string) {
   return md.split("\n").map((line, i) => {
-    if (line.startsWith("## ")) {
-      return <h2 key={i} className="text-sm font-semibold text-muted uppercase tracking-wider border-b border-border pb-1 mt-6 mb-2">{line.slice(3)}</h2>;
+    const t = line.trim();
+    if (t.startsWith("### ")) {
+      return <h3 key={i} className="text-xs font-semibold text-muted uppercase tracking-wider mt-5 mb-1">{renderInline(t.slice(4))}</h3>;
     }
-    if (line.startsWith("- ")) {
-      return <li key={i} className="text-sm text-foreground/90 ml-4">· {line.slice(2)}</li>;
+    if (t.startsWith("## ")) {
+      return <h2 key={i} className="text-sm font-semibold text-muted uppercase tracking-wider border-b border-border pb-1 mt-6 mb-2">{renderInline(t.slice(3))}</h2>;
     }
-    if (line.trim() === "") return <br key={i} />;
-    return <p key={i} className="text-sm text-foreground/90 leading-relaxed">{line}</p>;
+    if (t.startsWith("# ")) {
+      return <h1 key={i} className="text-base font-bold text-foreground mt-6 mb-3">{renderInline(t.slice(2))}</h1>;
+    }
+    if (t.startsWith("- ") || t.startsWith("· ") || t.startsWith("• ")) {
+      return <li key={i} className="text-sm text-foreground/90 ml-4 list-none">· {renderInline(t.slice(2))}</li>;
+    }
+    if (t === "") return <br key={i} />;
+    return <p key={i} className="text-sm text-foreground/90 leading-relaxed">{renderInline(t)}</p>;
   });
 }
 
@@ -39,7 +55,7 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
       <div className="flex items-center justify-between">
         <div className="space-y-1">
           <button
-            onClick={() => router.push(`/session/${id}`)}
+            onClick={() => router.push(`/session/${id}?view=history`)}
             className="text-xs text-muted hover:text-foreground transition-colors"
           >
             ← Back to debate

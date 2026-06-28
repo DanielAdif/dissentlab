@@ -2,6 +2,15 @@ import { getPersonaStyle } from "@/lib/utils";
 import type { DebateMessage } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
+function renderInline(text: string): React.ReactNode {
+  const parts = text.split(/(\*\*[^*]+\*\*)/);
+  return parts.map((part, i) =>
+    part.startsWith("**") && part.endsWith("**")
+      ? <strong key={i} className="font-semibold">{part.slice(2, -2)}</strong>
+      : part
+  );
+}
+
 type Props = {
   message?: DebateMessage;
   personaId: string;
@@ -47,7 +56,7 @@ export function MessageCard({ message, personaId }: Props) {
           isWaiting ? "text-muted italic" : "text-foreground"
         )}
       >
-        {message ? message.content : "Preparing position…"}
+        {message ? renderInline(message.content) : "Preparing position…"}
       </p>
       {message && message.cited_sources.length > 0 && (
         <div className="mt-1.5 flex flex-wrap gap-1">

@@ -1,6 +1,6 @@
 "use client";
 import { use, useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useDebateSocket } from "@/hooks/useDebateSocket";
 import { useSessionStore } from "@/stores/sessionStore";
 import { useSession } from "@/hooks/useSession";
@@ -48,19 +48,39 @@ function getPersonaStatus(personaId: string, phase: string): string {
 export default function SessionPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const isViewMode = searchParams.get("view") === "history";
   const store = useSessionStore();
   const { connect, disconnect, sendStop, connected, everConnected } = useDebateSocket(id);
   const bottomRef = useRef<HTMLDivElement>(null);
   const { data: session } = useSession(id);
 
+  // View mode: load completed debate from REST API — no WebSocket needed.
+  // Read window.location.search directly (effects are client-only, so this is always accurate).
   useEffect(() => {
+    const view = new URLSearchParams(window.location.search).get("view") === "history";
+    if (!view || !session) return;
+    store.reset();
+    store.setSession(id, session.question);
+    session.messages?.forEach((msg) => store.addMessage(msg));
+    session.checkpoints?.forEach((cp) => store.addCheckpoint(cp));
+    if (session.report?.content_markdown) {
+      store.setFinalReport(session.report.content_markdown);
+    }
+  }, [session]);
+
+  // Live mode: connect WebSocket only when NOT viewing history.
+  useEffect(() => {
+    const view = new URLSearchParams(window.location.search).get("view") === "history";
+    if (view) return;
     store.reset();
     connect();
     return () => disconnect();
   }, [id]);
 
   useEffect(() => {
-    if (session && !store.question) {
+    const view = new URLSearchParams(window.location.search).get("view") === "history";
+    if (session && !store.question && !view) {
       store.setSession(id, session.question);
     }
   }, [session]);
@@ -71,8 +91,10 @@ export default function SessionPage({ params }: { params: Promise<{ id: string }
     }
   }, [store.messages.length, store.checkpoints.length]);
 
+  // Only redirect to report during a live debate completion, not when viewing history.
   useEffect(() => {
-    if (store.phase === "completed" && store.finalReport) {
+    const view = new URLSearchParams(window.location.search).get("view") === "history";
+    if (!view && store.phase === "completed" && store.finalReport) {
       router.push(`/session/${id}/report`);
     }
   }, [store.phase, store.finalReport]);
@@ -189,24 +211,35 @@ export default function SessionPage({ params }: { params: Promise<{ id: string }
 
         {/* Controls */}
         <div className="p-[10px] border-t border-border flex flex-col gap-[5px]">
-          <button
-            onClick={sendStop}
-            className="w-full text-[11px] text-muted border border-border rounded-[6px] px-[10px] py-[6px] cursor-pointer text-center bg-transparent hover:text-foreground transition-colors"
-          >
-            Stop debate
-          </button>
+          {isViewMode ? (
+            <button
+              onClick={() => router.push(`/session/${id}/report`)}
+              className="w-full text-[11px] text-muted border border-border rounded-[6px] px-[10px] py-[6px] cursor-pointer text-center bg-transparent hover:text-foreground transition-colors"
+            >
+              View report →
+            </button>
+          ) : (
+            <button
+              onClick={sendStop}
+              className="w-full text-[11px] text-muted border border-border rounded-[6px] px-[10px] py-[6px] cursor-pointer text-center bg-transparent hover:text-foreground transition-colors"
+            >
+              Stop debate
+            </button>
+          )}
           <button
             onClick={() => router.push("/")}
             className="w-full text-[11px] text-muted border border-border rounded-[6px] px-[10px] py-[6px] cursor-pointer text-center bg-transparent hover:text-foreground transition-colors"
           >
             ← New question
           </button>
-          <button
-            onClick={() => store.setAutoScroll(!store.autoScroll)}
-            className="w-full text-[11px] text-muted border border-border rounded-[6px] px-[10px] py-[6px] cursor-pointer text-center bg-transparent hover:text-foreground transition-colors"
-          >
-            {store.autoScroll ? "Pause scroll" : "Resume scroll"}
-          </button>
+          {!isViewMode && (
+            <button
+              onClick={() => store.setAutoScroll(!store.autoScroll)}
+              className="w-full text-[11px] text-muted border border-border rounded-[6px] px-[10px] py-[6px] cursor-pointer text-center bg-transparent hover:text-foreground transition-colors"
+            >
+              {store.autoScroll ? "Pause scroll" : "Resume scroll"}
+            </button>
+          )}
         </div>
       </aside>
 

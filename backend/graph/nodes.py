@@ -5,21 +5,71 @@ import asyncio
 
 
 def _extract_json(raw: str) -> dict:
+    """Parse a JSON dict from raw model output using progressive fallback strategies."""
     text = raw.strip()
-    # Strip ```json ... ``` or ``` ... ``` fences
-    text = re.sub(r"^```(?:json)?\s*", "", text)
-    text = re.sub(r"\s*```$", "", text)
-    text = text.strip()
+
+    # 1. Direct parse
     try:
-        return json.loads(text)
-    except json.JSONDecodeError:
+        result = json.loads(text)
+        if isinstance(result, dict):
+            return result
+    except (json.JSONDecodeError, ValueError):
         pass
-    # Fall back to extracting the first {...} block from surrounding prose
+
+    # 2. Strip outer code fence then re-parse
+    stripped = re.sub(r"^```(?:json)?\s*", "", text)
+    stripped = re.sub(r"\s*```\s*$", "", stripped).strip()
+    if stripped != text:
+        try:
+            result = json.loads(stripped)
+            if isinstance(result, dict):
+                return result
+        except (json.JSONDecodeError, ValueError):
+            pass
+
+    # 3. Find a JSON block inside an inline ```json … ``` fence
+    fence = re.search(r"```(?:json)?\s*(\{[\s\S]*?\})\s*```", text)
+    if fence:
+        try:
+            result = json.loads(fence.group(1))
+            if isinstance(result, dict):
+                return result
+        except (json.JSONDecodeError, ValueError):
+            pass
+
+    # 4. Find the first { … last } anywhere in the text
     start = text.find("{")
     end = text.rfind("}")
     if start != -1 and end > start:
-        return json.loads(text[start:end + 1])
+        try:
+            result = json.loads(text[start : end + 1])
+            if isinstance(result, dict):
+                return result
+        except (json.JSONDecodeError, ValueError):
+            pass
+
     raise json.JSONDecodeError("No JSON object found", text, 0)
+
+
+def _str_content(value: object, fallback: str) -> str:
+    """Coerce a JSON value to a plain string, handling dict/list model mistakes."""
+    if isinstance(value, str):
+        return value.strip()
+    if isinstance(value, dict):
+        return " ".join(str(v) for v in value.values() if v).strip()
+    if isinstance(value, list):
+        return " ".join(str(v) for v in value if v).strip()
+    if value is not None:
+        return str(value).strip()
+    return fallback
+
+
+def _clean_text(raw: str) -> str:
+    """Strip markdown formatting and JSON code blocks from plain-text output."""
+    text = re.sub(r"```[\s\S]*?```", "", raw)
+    text = re.sub(r"\*\*([^*]*)\*\*\s*:?\s*", "", text)
+    text = re.sub(r"\s+", " ", text).strip()
+    return text or raw.strip()
 from datetime import datetime, timezone
 from models.gateway import ModelGateway, ModelConfig
 from agents.base import (
@@ -113,11 +163,14 @@ async def node_initial_positions(state: CouncilState) -> CouncilState:
             raw = await gateway.generate(messages, config)
             try:
                 parsed = _extract_json(raw)
-                content = parsed.get("argument", raw)
-                confidence = parsed.get("confidence", "Medium")
-                cited = parsed.get("evidence_used", [])
+                raw_arg = parsed.get("argument") or parsed.get("position")
+                content = _str_content(raw_arg, raw)
+                confidence = str(parsed.get("confidence", "Medium")).strip()
+                if confidence not in ("Low", "Medium", "High"):
+                    confidence = "Medium"
+                cited = [str(c) for c in (parsed.get("evidence_used") or []) if c]
             except (json.JSONDecodeError, ValueError):
-                content = raw
+                content = _clean_text(raw)
                 confidence = "Medium"
                 cited = []
         except Exception as e:
@@ -167,11 +220,14 @@ async def node_debate_round(state: CouncilState) -> CouncilState:
             raw = await gateway.generate(messages, config)
             try:
                 parsed = _extract_json(raw)
-                content = parsed.get("argument", raw)
-                confidence = parsed.get("confidence", "Medium")
-                cited = parsed.get("evidence_used", [])
+                raw_arg = parsed.get("argument") or parsed.get("position")
+                content = _str_content(raw_arg, raw)
+                confidence = str(parsed.get("confidence", "Medium")).strip()
+                if confidence not in ("Low", "Medium", "High"):
+                    confidence = "Medium"
+                cited = [str(c) for c in (parsed.get("evidence_used") or []) if c]
             except (json.JSONDecodeError, ValueError):
-                content = raw
+                content = _clean_text(raw)
                 confidence = "Medium"
                 cited = []
         except Exception as e:
