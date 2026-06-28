@@ -58,9 +58,9 @@ export default function HomePage() {
   }
 
   return (
-    <div className="flex flex-col h-full overflow-y-auto items-center justify-center px-5 py-8">
+    <div className="absolute inset-0 overflow-y-auto px-5 py-[10vh]">
       <div
-        className="w-full max-w-[600px] flex flex-col gap-[38px] animate-home-in"
+        className="mx-auto w-full max-w-[600px] flex flex-col gap-[38px] animate-home-in"
       >
         {/* Hero */}
         <div className="text-center">
@@ -144,7 +144,7 @@ export default function HomePage() {
             <p className="text-[10px] text-muted uppercase tracking-[0.14em] text-center mb-[14px]">
               The Council
             </p>
-            <div className="grid grid-cols-4 gap-[10px]">
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: '10px' }}>
               {COUNCIL_PREVIEW.map(({ id, role }) => {
                 const style = getPersonaStyle(id);
                 return (

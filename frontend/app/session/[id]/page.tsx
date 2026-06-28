@@ -49,7 +49,7 @@ export default function SessionPage({ params }: { params: Promise<{ id: string }
   const { id } = use(params);
   const router = useRouter();
   const store = useSessionStore();
-  const { connect, disconnect, sendStop, connected } = useDebateSocket(id);
+  const { connect, disconnect, sendStop, connected, everConnected } = useDebateSocket(id);
   const bottomRef = useRef<HTMLDivElement>(null);
   const { data: session } = useSession(id);
 
@@ -106,7 +106,7 @@ export default function SessionPage({ params }: { params: Promise<{ id: string }
   });
 
   return (
-    <div className="flex h-full">
+    <div className="absolute inset-0 flex">
       {/* Left council panel */}
       <aside className="w-[198px] shrink-0 bg-surface border-r border-border flex flex-col overflow-y-auto scrollbar-thin">
         {/* Question */}
@@ -213,7 +213,7 @@ export default function SessionPage({ params }: { params: Promise<{ id: string }
       {/* Main debate feed */}
       <main className="flex-1 overflow-y-auto bg-background scrollbar-thin">
         <div className="px-[22px] pt-[22px] pb-[80px]">
-          {!connected && (
+          {!connected && everConnected && (
             <div className="mb-4">
               <ErrorBanner
                 message="Connection lost. Attempting to reconnect..."
@@ -267,7 +267,7 @@ export default function SessionPage({ params }: { params: Promise<{ id: string }
                 </div>
 
                 {/* 3-column message grid */}
-                <div className="grid grid-cols-3 gap-[10px] items-start">
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: '10px', alignItems: 'start' }}>
                   {DEBATERS.map((personaId) => {
                     const msg = roundMessages.find((m) => m.persona_id === personaId);
                     return (

@@ -1,19 +1,25 @@
 import type { Metadata } from "next";
-import { DM_Sans, Playfair_Display } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 import Providers from "./providers";
 import { Sidebar } from "@/components/layout/Sidebar";
 
-const dmSans = DM_Sans({
-  subsets: ["latin"],
-  axes: ["opsz"],
+const dmSans = localFont({
+  src: [
+    { path: "../public/fonts/dm-sans-latin-wght-normal.woff2", style: "normal", weight: "100 700" },
+    { path: "../public/fonts/dm-sans-latin-wght-italic.woff2", style: "italic", weight: "100 700" },
+  ],
   variable: "--font-dm-sans",
+  display: "swap",
 });
 
-const playfair = Playfair_Display({
-  subsets: ["latin"],
-  style: ["normal", "italic"],
+const playfair = localFont({
+  src: [
+    { path: "../public/fonts/playfair-display-latin-wght-normal.woff2", style: "normal", weight: "400 700" },
+    { path: "../public/fonts/playfair-display-latin-wght-italic.woff2", style: "italic", weight: "400 700" },
+  ],
   variable: "--font-playfair",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -23,7 +29,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${dmSans.variable} ${playfair.variable}`}>
+    <html lang="en" className={`${dmSans.variable} ${playfair.variable}`} suppressHydrationWarning>
       <head>
         {/* Applies saved theme before paint; defaults to light */}
         <script
@@ -35,7 +41,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="flex flex-col h-screen overflow-hidden">
         <Providers>
           <Sidebar />
-          <div className="flex-1 min-h-0">
+          <div className="flex-1 min-h-0 relative overflow-hidden">
             {children}
           </div>
         </Providers>

@@ -15,6 +15,7 @@ const WS_BASE = typeof window !== "undefined"
 export function useDebateSocket(sessionId: string | null) {
   const ws = useRef<WebSocket | null>(null);
   const [connected, setConnected] = useState(false);
+  const [everConnected, setEverConnected] = useState(false);
   const reconnectAttempts = useRef(0);
   const store = useSessionStore();
 
@@ -81,6 +82,7 @@ export function useDebateSocket(sessionId: string | null) {
 
     socket.onopen = () => {
       setConnected(true);
+      setEverConnected(true);
       reconnectAttempts.current = 0;
     };
 
@@ -127,5 +129,5 @@ export function useDebateSocket(sessionId: string | null) {
     }
   }, []);
 
-  return { connect, disconnect, sendStop, sendSkipToFinal, connected };
+  return { connect, disconnect, sendStop, sendSkipToFinal, connected, everConnected };
 }
