@@ -10,6 +10,10 @@ const nextConfig: NextConfig = {
         source: "/api/:path*",
         destination: `${BACKEND_URL}/api/:path*`,
       },
+      {
+        source: "/ws/:path*",
+        destination: `${BACKEND_URL}/ws/:path*`,
+      },
     ];
   },
   async headers() {

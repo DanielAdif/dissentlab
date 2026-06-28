@@ -16,7 +16,9 @@ export function MessageCard({ message, personaId }: Props) {
       className={cn("rounded-lg px-[13px] py-3 border border-l-[3px] min-h-[88px] animate-msg-in")}
       style={{
         background: isWaiting ? "#F0EBE8" : style.bg,
-        borderColor: isWaiting ? "#DDD5CB" : style.color + "33",
+        borderTopColor: isWaiting ? "#DDD5CB" : style.color + "33",
+        borderRightColor: isWaiting ? "#DDD5CB" : style.color + "33",
+        borderBottomColor: isWaiting ? "#DDD5CB" : style.color + "33",
         borderLeftColor: style.color,
       }}
     >
